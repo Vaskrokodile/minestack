@@ -300,71 +300,91 @@ function Sidebar({ currentView, setCurrentView, channels, selectedChannel, setSe
   setSelectedChannel: (id: string | null) => void; setSelectedDM: (id: string | null) => void; user: Profile;
   showSidebar: boolean; setShowSidebar: (v: boolean) => void; darkMode: boolean; toggleTheme: () => void;
 }) {
-  const [expandedSections, setExpandedSections] = useState({ channels: true, dms: true, apps: true });
-  const toggleSection = (section: 'channels' | 'dms' | 'apps') => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  const NavItem = ({ icon: Icon, label, active, onClick }: { icon: any; label: string; active?: boolean; onClick?: () => void }) => (
-    <button onClick={onClick} className={cn(
-      "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-      active ? "bg-[var(--topaz-500)] text-white shadow-md" : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
-    )}>
-      <Icon className="h-5 w-5 flex-shrink-0" />
-      {showSidebar && <span>{label}</span>}
-    </button>
-  );
-
   return (
-    <aside className={cn("flex flex-col bg-[var(--bg-sidebar)] text-white transition-all duration-300", showSidebar ? "w-[280px]" : "w-20")}>
-      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
-        {showSidebar ? (
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--topaz-400)] to-[var(--topaz-600)] shadow-lg">
-              <MessageSquare className="h-5 w-5" />
-            </div>
-            <span className="font-bold">MineSlack</span>
-          </div>
-        ) : (
-          <MessageSquare className="h-6 w-6 text-[var(--topaz-400)]" />
-        )}
+    <aside className={cn("flex flex-col bg-[var(--bg-sidebar)] text-white transition-all duration-300", showSidebar ? "w-[260px]" : "w-20")}>
+      <div className="flex h-16 items-center justify-center border-b border-white/10">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--topaz-400)] to-[var(--topaz-600)] shadow-lg">
+          <MessageSquare className="h-5 w-5" />
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        <NavItem icon={Hash} label="Channels" active={currentView === 'messages' && selectedChannel !== null} onClick={() => setCurrentView('messages')} />
-        
+      <nav className="flex-1 overflow-y-auto p-3">
         {showSidebar && (
-          <div className="pt-4">
-            <button onClick={() => toggleSection('channels')} className="mb-2 flex w-full items-center justify-between px-3 text-xs font-semibold uppercase tracking-wider text-white/50 hover:text-white/70">
-              <span>Channels</span>
-              {expandedSections.channels ? <ChevronDown className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+          <div className="mb-6">
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-white/40">Workspace</p>
+            <button
+              onClick={() => { setSelectedChannel(null); setSelectedDM(null); setCurrentView('messages'); }}
+              className={cn("mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                currentView === 'messages' && !selectedChannel ? "bg-[var(--topaz-500)] text-white shadow-md" : "text-white/70 hover:bg-white/10 hover:text-white"
+              )}
+            >
+              <Hash className="h-5 w-5" />
+              <span>All Messages</span>
             </button>
-            {expandedSections.channels && channels.map(ch => (
-              <button key={ch.id} onClick={() => { setSelectedChannel(ch.id); setSelectedDM(null); setCurrentView('messages'); }}
-                className={cn("mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all",
-                  selectedChannel === ch.id ? "bg-white/15 text-white" : "text-white/70 hover:bg-white/10 hover:text-white")}>
-                {ch.is_private ? <Lock className="h-4 w-4 flex-shrink-0" /> : <Hash className="h-4 w-4 flex-shrink-0" />}
+          </div>
+        )}
+
+        {showSidebar && channels.length > 0 && (
+          <div className="mb-6">
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-white/40">Channels</p>
+            {channels.map(ch => (
+              <button
+                key={ch.id}
+                onClick={() => { setSelectedChannel(ch.id); setSelectedDM(null); setCurrentView('messages'); }}
+                className={cn("mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                  selectedChannel === ch.id ? "bg-white/15 text-white" : "text-white/60 hover:bg-white/10 hover:text-white"
+                )}
+              >
+                {ch.is_private ? <Lock className="h-4 w-4 text-white/40" /> : <Hash className="h-4 w-4 text-white/40" />}
                 <span className="truncate">{ch.name}</span>
               </button>
             ))}
           </div>
         )}
 
-        <div className="my-4 h-px bg-white/10"></div>
-
-        <NavItem icon={Briefcase} label="Campaigns" active={currentView === 'campaigns'} onClick={() => { setCurrentView('campaigns'); setSelectedChannel(null); setSelectedDM(null); }} />
-        <NavItem icon={FolderKanban} label="Projects" active={currentView === 'projects'} onClick={() => { setCurrentView('projects'); setSelectedChannel(null); setSelectedDM(null); }} />
-        <NavItem icon={DollarSign} label="Finance" active={currentView === 'finance'} onClick={() => { setCurrentView('finance'); setSelectedChannel(null); setSelectedDM(null); }} />
+        <div className="mb-6">
+          {showSidebar && <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-white/40">Tools</p>}
+          <button
+            onClick={() => { setCurrentView('campaigns'); setSelectedChannel(null); setSelectedDM(null); }}
+            className={cn("mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+              currentView === 'campaigns' ? "bg-white/15 text-white" : "text-white/60 hover:bg-white/10 hover:text-white"
+            )}
+          >
+            <Briefcase className="h-5 w-5" />
+            {showSidebar && <span>Campaigns</span>}
+          </button>
+          <button
+            onClick={() => { setCurrentView('projects'); setSelectedChannel(null); setSelectedDM(null); }}
+            className={cn("mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+              currentView === 'projects' ? "bg-white/15 text-white" : "text-white/60 hover:bg-white/10 hover:text-white"
+            )}
+          >
+            <FolderKanban className="h-5 w-5" />
+            {showSidebar && <span>Projects</span>}
+          </button>
+          <button
+            onClick={() => { setCurrentView('finance'); setSelectedChannel(null); setSelectedDM(null); }}
+            className={cn("mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+              currentView === 'finance' ? "bg-white/15 text-white" : "text-white/60 hover:bg-white/10 hover:text-white"
+            )}
+          >
+            <DollarSign className="h-5 w-5" />
+            {showSidebar && <span>Finance</span>}
+          </button>
+        </div>
       </nav>
 
       <div className="border-t border-white/10 p-3">
-        <button onClick={toggleTheme} className="mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-all">
+        <button
+          onClick={toggleTheme}
+          className="mb-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/60 hover:bg-white/10 hover:text-white transition-all"
+        >
           {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          {showSidebar && <span>{darkMode ? 'Light mode' : 'Dark mode'}</span>}
+          {showSidebar && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
         </button>
-        <div className="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-2.5">
+        <div className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5">
           <div className="relative flex-shrink-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--topaz-400)] to-[var(--topaz-600)] text-sm font-medium">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--topaz-400)] to-[var(--topaz-600)] text-sm font-semibold">
               {getInitials(user.full_name || user.email)}
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-[var(--bg-sidebar)]"></div>
@@ -372,7 +392,7 @@ function Sidebar({ currentView, setCurrentView, channels, selectedChannel, setSe
           {showSidebar && (
             <div className="flex-1 truncate">
               <p className="truncate text-sm font-medium">{user.full_name || 'User'}</p>
-              <p className="truncate text-xs text-white/50">{user.email}</p>
+              <p className="truncate text-xs text-white/40">{user.email}</p>
             </div>
           )}
         </div>
